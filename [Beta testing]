@@ -1,0 +1,3395 @@
+# [RNG Calc Roulette]
+© 2026 [William (HtjarghYT)]. All rights reserved.
+
+PLS CHECK OUT MY YT CHANNEL HtjarghYT thanks
+
+You are welcome to play the game via the GitHub Pages link of Netlify web link.
+However, you do not have permission to copy, modify, distribute, or republish the source code of this game.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RNG CALC ROULETTE</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --black:#000000;
+    --blue:#0a84ff;
+    --blue-faint:rgba(10,132,255,0.32);
+    --blue-mid:rgba(10,132,255,0.4);
+    --blue-soft:rgba(10,132,255,0.5);
+    --white:#ffffff;
+    --gray:#8e8e93;
+    --red:#ff3b30;
+    --orange:#ff9500;
+    --green:#34c759;
+    --card:rgba(255,255,255,0.08);
+    --card-soft:rgba(255,255,255,0.06);
+    --divider:rgba(255,255,255,0.15);
+    --modal-bg:#1c1c1e;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+  }
+
+  body{
+    min-height:100vh;
+    background:#000;
+    color:var(--white);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* ============================================================
+     CALCULATOR BACKGROUND
+     ============================================================ */
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:-5%;
+    z-index:-3;
+
+    background:
+      radial-gradient(circle at 50% 25%, rgba(10,132,255,0.18), transparent 45%),
+      linear-gradient(135deg,#000 0%,#03111d 45%,#000 100%);
+
+    pointer-events:none;
+  }
+
+  /* Large calculator keypad/grid */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    pointer-events:none;
+    opacity:0.18;
+
+    background:
+      /* calculator screen */
+      linear-gradient(
+        rgba(10,132,255,0.18),
+        rgba(10,132,255,0.18)
+      ) 50% 8% / 230px 72px no-repeat,
+
+      /* calculator buttons */
+      radial-gradient(
+        circle,
+        rgba(255,255,255,0.18) 0 2px,
+        transparent 3px
+      ) 0 0 / 58px 58px,
+
+      /* calculator grid */
+      linear-gradient(
+        rgba(10,132,255,0.10) 1px,
+        transparent 1px
+      ) 0 0 / 58px 58px,
+
+      linear-gradient(
+        90deg,
+        rgba(10,132,255,0.10) 1px,
+        transparent 1px
+      ) 0 0 / 58px 58px;
+
+    mask-image:linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 15%,
+      black 85%,
+      transparent 100%
+    );
+  }
+
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    position:relative;
+    min-height:100vh;
+  }
+
+  .screen{
+    display:none;
+    flex-direction:column;
+    min-height:100vh;
+    padding:28px 22px;
+  }
+
+  #screen-0{display:flex;}
+
+  .spacer{
+    flex:1 1 auto;
+  }
+
+  .btn-primary{
+    position:relative;
+    display:block;
+    width:100%;
+    min-height:52px;
+    padding:10px 16px;
+    background:transparent;
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-family:'Courier New',monospace;
+    font-weight:900;
+    font-size:1rem;
+    letter-spacing:1.5px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.55),
+      0 3px 0 rgba(255,255,255,0.16),
+      0 8px 14px rgba(0,0,0,0.8);
+    transform:translateY(0);
+    transition:
+      transform 90ms ease-out,
+      text-shadow 90ms ease-out,
+      opacity 120ms ease;
+  }
+
+  .btn-primary::after{
+    content:"";
+    position:absolute;
+    left:12%;
+    right:12%;
+    bottom:5px;
+    height:10px;
+    border-radius:50%;
+    background:rgba(0,0,0,0.65);
+    filter:blur(7px);
+    z-index:-1;
+    transform:translateY(9px) scaleX(0.82);
+    transition:
+      transform 90ms ease-out,
+      opacity 90ms ease-out;
+  }
+
+  .btn-primary:hover{
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.65),
+      0 4px 0 rgba(255,255,255,0.18),
+      0 10px 18px rgba(0,0,0,0.85);
+  }
+
+  .btn-primary:active,
+  .btn-primary.is-pressed{
+    transform:translateY(6px);
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.35),
+      0 2px 0 rgba(255,255,255,0.08),
+      0 3px 5px rgba(0,0,0,0.75);
+  }
+
+  .btn-primary:active::after,
+  .btn-primary.is-pressed::after{
+    transform:translateY(3px) scaleX(0.92);
+    opacity:0.35;
+  }
+
+  .btn-primary:disabled{
+    background:transparent;
+    color:var(--gray);
+    cursor:not-allowed;
+    text-shadow:none;
+    opacity:0.55;
+    transform:none;
+  }
+
+  .btn-primary:disabled::after{
+    opacity:0;
+  }
+
+  .btn-danger{
+    background:rgba(255,59,48,0.88);
+    color:#fff;
+    border:none;
+    border-radius:15px;
+    padding:16px;
+    font-weight:800;
+    font-size:1rem;
+    width:100%;
+    cursor:pointer;
+    margin-top:10px;
+  }
+
+  .exit-btn,.resign-btn{
+    background:none;
+    border:none;
+    color:var(--red);
+    font-weight:800;
+    font-size:0.72rem;
+    letter-spacing:0.5px;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    cursor:pointer;
+    padding:4px;
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:2px 2px 18px;
+  }
+
+  .topbar-title{
+    font-weight:800;
+    font-size:1rem;
+  }
+
+  .topbar-spacer{
+    width:55px;
+  }
+
+  /* ============================================================
+     TITLE SCREEN
+     ============================================================ */
+
+  .title-rng{
+    /* Handwritten/cursive, but still readable */
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:6.25rem;
+    transform:rotate(-4deg) skewX(-5deg);
+    text-align:center;
+    line-height:0.9;
+    margin:0;
+    letter-spacing:-1px;
+  }
+
+  .title-calc{
+    font-family:'Courier New',monospace;
+    font-weight:900;
+    font-size:3.6rem;
+    letter-spacing:-4px;
+    text-align:center;
+    line-height:1;
+    margin:5px 0 0;
+  }
+
+  /*
+     ROULETTE TITLE
+
+     Instead of having a normal "R", the gun itself forms
+     the R. The roulette wheel forms the O.
+  */
+
+  .title-roulette-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    margin-top:8px;
+    height:60px;
+  }
+
+  .title-gun-r{
+    width:52px;
+    height:52px;
+    flex-shrink:0;
+    transform:rotate(0deg);
+  }
+
+  .title-wheel-o{
+    width:34px;
+    height:34px;
+    flex-shrink:0;
+    margin-left:0;
+    margin-right:0;
+  }
+
+  .title-ulette{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:2.2rem;
+    letter-spacing:-1px;
+    line-height:1;
+    margin-left:-1px;
+  }
+
+  .title-sub{
+    font-family:'Courier New',monospace;
+    font-size:0.8rem;
+    font-weight:700;
+    letter-spacing:2px;
+    color:var(--gray);
+    text-align:center;
+    margin-top:16px;
+  }
+
+  .title-start-btn{
+    letter-spacing:2px;
+    font-size:1.05rem;
+    min-height:58px;
+    margin-top:2px;
+  }
+
+  .title-start-btn::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:82%;
+    height:72%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:radial-gradient(
+      ellipse,
+      rgba(255,255,255,0.08),
+      transparent 68%
+    );
+    filter:blur(10px);
+    pointer-events:none;
+    z-index:-2;
+  }
+
+  .title-start-btn:focus-visible{
+    outline:2px solid var(--blue);
+    outline-offset:5px;
+  }
+
+  .title-footer{
+    font-size:0.78rem;
+    color:var(--gray);
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* ============================================================
+     SHARED TEXT
+     ============================================================ */
+
+  h1.screen-title{
+    font-size:1.85rem;
+    font-weight:900;
+    text-align:center;
+    margin:6px 0 2px;
+  }
+
+  p.screen-sub{
+    color:var(--gray);
+    text-align:center;
+    margin:0 0 18px;
+    font-size:0.9rem;
+  }
+
+  /* ============================================================
+     PLAYER SETUP
+     ============================================================ */
+
+  .segment{
+    display:flex;
+    background:rgba(255,255,255,0.08);
+    border-radius:9px;
+    padding:3px;
+    margin-bottom:20px;
+  }
+
+  .seg-btn{
+    flex:1;
+    padding:9px 4px;
+    border:none;
+    background:transparent;
+    color:#fff;
+    border-radius:7px;
+    font-weight:700;
+    font-size:0.82rem;
+    cursor:pointer;
+  }
+
+  .seg-active{
+    background:#fff;
+    color:#000;
+  }
+
+  .field-group{
+    margin-bottom:12px;
+  }
+
+  .field-group label{
+    display:block;
+    font-size:0.68rem;
+    font-weight:800;
+    color:var(--gray);
+    letter-spacing:0.6px;
+    margin-bottom:5px;
+  }
+
+  .field-group input[type=text]{
+    width:100%;
+    padding:11px 12px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.04);
+    color:#fff;
+    font-size:1rem;
+  }
+
+  .field-group input:focus{
+    outline:2px solid var(--blue);
+    outline-offset:1px;
+  }
+
+  /* ============================================================
+     RULES
+     ============================================================ */
+
+  .rules-scroll{
+    overflow-y:auto;
+    flex:1;
+  }
+
+  .rule{
+    margin-bottom:16px;
+  }
+
+  .rule-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:5px;
+  }
+
+  .rule-num{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:1rem;
+    flex-shrink:0;
+  }
+
+  .rule-title{
+    font-weight:800;
+    font-size:1rem;
+  }
+
+  .rule-text{
+    color:var(--gray);
+    white-space:pre-line;
+    margin:0;
+    padding-left:42px;
+    font-size:0.88rem;
+    line-height:1.4;
+  }
+
+  .agree-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    cursor:pointer;
+    margin:16px 0;
+    background:none;
+    border:none;
+    color:#fff;
+    text-align:left;
+    padding:0;
+    width:100%;
+  }
+
+  .agree-icon{
+    font-size:1.35rem;
+    line-height:1;
+    flex-shrink:0;
+  }
+
+  .agree-text{
+    font-size:0.86rem;
+  }
+
+  /* ============================================================
+     COIN FLIP
+     ============================================================ */
+
+  .coin-title{
+    font-size:1.9rem;
+    font-weight:900;
+    text-align:center;
+  }
+
+  .coin-subtitle{
+    font-size:1.35rem;
+    font-weight:800;
+    text-align:center;
+    margin-top:6px;
+  }
+
+  .coin-result{
+    font-size:1.6rem;
+    font-weight:800;
+    text-align:center;
+    margin-top:16px;
+  }
+
+  /* ============================================================
+     GAME SCREEN
+     ============================================================ */
+
+  .game-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 18px;
+    background:rgba(0,0,0,0.5);
+    margin:-28px -22px 0;
+  }
+
+  .game-topbar .topbar-title{
+    font-weight:800;
+    font-size:0.95rem;
+  }
+
+  .game-content{
+    padding:20px 2px;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  .score-bar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .score-card{
+    flex:1;
+    min-width:68px;
+    background:rgba(255,255,255,0.08);
+    border-radius:10px;
+    padding:8px 4px;
+    text-align:center;
+  }
+
+  .score-current{
+    background:var(--blue-soft);
+  }
+
+  .score-name{
+    font-size:0.68rem;
+    font-weight:800;
+  }
+
+  .score-value{
+    font-size:1.15rem;
+    font-weight:800;
+  }
+
+  .resigned-tag{
+    font-size:0.5rem;
+    font-weight:800;
+    color:var(--red);
+    display:block;
+    margin-top:2px;
+  }
+
+  hr.divider{
+    border:none;
+    border-top:1px solid var(--divider);
+    margin:18px 0;
+  }
+
+  .section-title{
+    font-weight:800;
+    font-size:1rem;
+    margin-bottom:6px;
+  }
+
+  .section-note{
+    color:var(--gray);
+    font-size:0.85rem;
+    margin:0 0 10px;
+  }
+
+  .row-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(255,255,255,0.06);
+    border-radius:8px;
+    padding:12px;
+    margin-bottom:8px;
+  }
+
+  .guess-value{
+    font-weight:800;
+    font-size:1.05rem;
+  }
+
+  .dash{
+    color:var(--gray);
+  }
+
+  .already-guessed{
+    font-size:0.76rem;
+    color:var(--orange);
+    margin-top:4px;
+  }
+
+  .turn-title{
+    font-size:1.3rem;
+    font-weight:800;
+    margin-bottom:12px;
+  }
+
+  .guess-row{
+    display:flex;
+    gap:8px;
+  }
+
+  .guess-row input{
+    flex:1;
+    min-width:0;
+    padding:11px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.04);
+    color:#fff;
+    font-size:1rem;
+  }
+
+  .guess-row button{
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:0 18px;
+    font-weight:800;
+    cursor:pointer;
+    font-size:0.9rem;
+  }
+
+  .game-message{
+    color:var(--orange);
+    font-weight:700;
+    text-align:center;
+    margin-top:10px;
+    font-size:0.86rem;
+    min-height:1.1em;
+  }
+
+  .history-card{
+    background:rgba(255,255,255,0.06);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+
+  .history-header{
+    display:flex;
+    justify-content:space-between;
+    font-weight:800;
+    margin-bottom:8px;
+    font-size:0.95rem;
+  }
+
+  .history-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.78rem;
+    padding:2px 0;
+  }
+
+  .bold{
+    font-weight:800;
+  }
+
+  /* ============================================================
+     ROULETTE
+     ============================================================ */
+
+  .roulette-label{
+    font-size:1.3rem;
+    font-weight:900;
+    text-align:center;
+    margin-bottom:18px;
+  }
+
+  .wheel-wrap{
+    width:min(320px,78vw);
+    height:min(320px,78vw);
+    margin:0 auto;
+    position:relative;
+  }
+
+  .wheel-guess-label{
+    fill:#fff !important;
+    font-weight:900 !important;
+    filter:drop-shadow(0 0 4px rgba(255,255,255,0.95));
+  }
+
+  .wheel-target-label{
+    fill:#fff !important;
+    font-weight:900 !important;
+    filter:drop-shadow(0 0 7px rgba(255,255,255,1));
+  }
+
+  /* Fixed pointer: stays still while the wheel spins underneath it. */
+  .wheel-pointer{
+    position:absolute;
+    top:-13px;
+    left:50%;
+    width:0;
+    height:0;
+    transform:translateX(-50%);
+    border-left:13px solid transparent;
+    border-right:13px solid transparent;
+    border-top:22px solid #fff;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,0.7));
+    z-index:10;
+    pointer-events:none;
+  }
+
+  #wheel-rotator{
+    width:100%;
+    height:100%;
+    transform:rotate(0deg);
+  }
+
+  .spinning-text{
+    text-align:center;
+    font-family:'Courier New',monospace;
+    font-weight:900;
+    font-size:1.25rem;
+    margin-top:20px;
+    display:none;
+  }
+
+  /* ============================================================
+     ROUND RESULTS
+     ============================================================ */
+
+  .result-number{
+    font-size:4rem;
+    font-weight:900;
+    font-family:'Courier New',monospace;
+    text-align:center;
+  }
+
+  .result-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(255,255,255,0.08);
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:8px;
+  }
+
+  .points{
+    font-size:1.35rem;
+    font-weight:800;
+  }
+
+  .score-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 6px;
+  }
+
+  .caption{
+    font-size:0.74rem;
+    color:var(--gray);
+  }
+
+  /* ============================================================
+     WINNER
+     ============================================================ */
+
+  .game-over-title{
+    font-size:2.4rem;
+    font-weight:900;
+    text-align:center;
+  }
+
+  .winner-title{
+    font-size:1.6rem;
+    font-weight:800;
+    text-align:center;
+    margin-top:4px;
+  }
+
+  .final-score-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.08);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:8px;
+  }
+
+  .winner-highlight{
+    background:var(--blue-mid);
+  }
+
+  .table-wrap{
+    overflow-x:auto;
+    margin-top:10px;
+    border-radius:10px;
+  }
+
+  table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:0.72rem;
+    min-width:340px;
+  }
+
+  th,td{
+    padding:8px 6px;
+    text-align:center;
+    border-bottom:1px solid var(--divider);
+    white-space:nowrap;
+  }
+
+  th{
+    background:var(--blue-mid);
+    font-size:0.66rem;
+  }
+
+  .row-alt{
+    background:rgba(255,255,255,0.05);
+  }
+
+  .total-row{
+    background:var(--blue-mid);
+    font-weight:800;
+  }
+
+  .pts-green{
+    color:var(--green);
+  }
+
+  .pts-gray{
+    color:var(--gray);
+  }
+
+  /* ============================================================
+     MODALS
+     ============================================================ */
+
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+
+  .modal-box{
+    background:var(--modal-bg);
+    border-radius:14px;
+    padding:20px 20px 0;
+    max-width:300px;
+    width:100%;
+    text-align:center;
+  }
+
+  .modal-title{
+    font-weight:800;
+    font-size:1rem;
+    margin-bottom:6px;
+  }
+
+  .modal-message{
+    color:var(--gray);
+    font-size:0.85rem;
+    margin-bottom:16px;
+  }
+
+  .modal-buttons{
+    display:flex;
+    border-top:1px solid rgba(255,255,255,0.15);
+    margin:0 -20px;
+  }
+
+  .modal-buttons button{
+    flex:1;
+    padding:12px;
+    background:none;
+    border:none;
+    color:var(--blue);
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+  }
+
+  .modal-buttons button.destructive{
+    color:var(--red);
+    font-weight:800;
+  }
+
+  .modal-buttons button+button{
+    border-left:1px solid rgba(255,255,255,0.15);
+  }
+
+  @media(max-width:380px){
+    .title-rng{
+      font-size:4.9rem;
+    }
+
+    .title-calc{
+      font-size:2.8rem;
+    }
+
+    .title-ulette{
+      font-size:1.7rem;
+    }
+
+    .title-gun-r{
+      width:43px;
+      height:43px;
+    }
+
+    .title-wheel-o{
+      width:29px;
+      height:29px;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- ============================================================
+       SCREEN 0: TITLE
+       ============================================================ -->
+
+  <div class="screen" id="screen-0">
+
+    <div class="spacer"></div>
+
+    <!-- Readable handwritten RNG -->
+    <div class="title-rng">RNG</div>
+
+    <!-- Calculator-style CALC -->
+    <div class="title-calc">CALC</div>
+
+    <!--
+         ROULETTE
+
+         Gun = R
+         Wheel = O
+         ULETTE = remaining letters
+    -->
+    <div class="title-roulette-row">
+
+      <!-- GLOCK-INSPIRED R -->
+      <svg
+        class="title-gun-r"
+        viewBox="0 0 120 80"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="R"
+        style="transform:scaleX(-1);"
+      >
+        <!-- slide / barrel: muzzle points toward the wheel -->
+        <path
+          d="M8 18
+             H88
+             Q98 18 98 26
+             V34
+             H59
+             V39
+             H22
+             V34
+             H8
+             Z"
+          fill="#fff"
+        />
+
+        <!-- slide detail -->
+        <path
+          d="M18 23 H72 V28 H18 Z"
+          fill="#000"
+          opacity=".22"
+        />
+
+        <!-- front sight -->
+        <path
+          d="M88 14 H96 V19 H88 Z"
+          fill="#fff"
+        />
+
+        <!-- Glock-style angled grip -->
+        <path
+          d="M52 38
+             H72
+             L84 67
+             Q86 73 79 75
+             H62
+             L48 46
+             Q46 39 52 38
+             Z"
+          fill="#fff"
+        />
+
+        <!-- trigger guard -->
+        <path
+          d="M43 42
+             H59
+             Q68 42 68 51
+             Q68 60 59 62
+             H52
+             V56
+             H58
+             Q62 56 62 51
+             Q62 48 58 48
+             H43
+             Z"
+          fill="#fff"
+        />
+
+        <!-- grip texture -->
+        <path
+          d="M61 52 L73 72 M57 55 L68 74"
+          stroke="#000"
+          stroke-width="2"
+          opacity=".18"
+        />
+      </svg>
+
+      <!-- ROULETTE-WHEEL O -->
+      <svg
+        class="title-wheel-o"
+        viewBox="0 0 100 100"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="O"
+      >
+        <!-- outer wheel -->
+        <circle
+          cx="50"
+          cy="50"
+          r="44"
+          fill="#000"
+          stroke="#fff"
+          stroke-width="6"
+        />
+
+        <!-- roulette sectors -->
+        <path d="M50 50 L50 8 A42 42 0 0 1 62.36 9.86 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L62.36 9.86 A42 42 0 0 1 73.33 16.67 Z"
+              fill="#000"/>
+        <path d="M50 50 L73.33 16.67 A42 42 0 0 1 86.16 37.64 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L86.16 37.64 A42 42 0 0 1 91.63 50 Z"
+              fill="#000"/>
+        <path d="M50 50 L91.63 50 A42 42 0 0 1 86.16 62.36 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L86.16 62.36 A42 42 0 0 1 73.33 83.33 Z"
+              fill="#000"/>
+        <path d="M50 50 L73.33 83.33 A42 42 0 0 1 62.36 90.14 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L62.36 90.14 A42 42 0 0 1 50 92 Z"
+              fill="#000"/>
+        <path d="M50 50 L50 92 A42 42 0 0 1 37.64 90.14 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L37.64 90.14 A42 42 0 0 1 26.67 83.33 Z"
+              fill="#000"/>
+        <path d="M50 50 L26.67 83.33 A42 42 0 0 1 13.84 62.36 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L13.84 62.36 A42 42 0 0 1 8.37 50 Z"
+              fill="#000"/>
+        <path d="M50 50 L8.37 50 A42 42 0 0 1 13.84 37.64 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L13.84 37.64 A42 42 0 0 1 26.67 16.67 Z"
+              fill="#000"/>
+        <path d="M50 50 L26.67 16.67 A42 42 0 0 1 37.64 9.86 Z"
+              fill="#ff3b30"/>
+        <path d="M50 50 L37.64 9.86 A42 42 0 0 1 50 8 Z"
+              fill="#000"/>
+
+        <!-- inner ring -->
+        <circle
+          cx="50"
+          cy="50"
+          r="31"
+          fill="#000"
+          stroke="#fff"
+          stroke-width="2"
+        />
+
+        <!-- center -->
+        <circle
+          cx="50"
+          cy="50"
+          r="7"
+          fill="#000"
+          stroke="#fff"
+          stroke-width="2"
+        />
+      </svg>
+
+      <div class="title-ulette">ULETTE</div>
+    </div>
+
+    <div class="title-sub">A NUMBER GUESSING GAME</div>
+
+    <div class="spacer"></div>
+
+    <button
+      class="btn-primary title-start-btn"
+      onclick="resetEverything(); goTo(1);"
+      aria-label="Touch to start"
+    >
+      TOUCH TO START
+    </button>
+
+    <div class="title-footer">RNG: 1&ndash;100</div>
+
+    <div class="spacer"></div>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 1: PLAYER SETUP
+       ============================================================ -->
+
+  <div class="screen" id="screen-1">
+    <div class="topbar">
+      <button class="exit-btn" onclick="showExitAlert()">&#10060; EXIT</button>
+      <div style="flex:1"></div>
+    </div>
+
+    <h1 class="screen-title">PLAYER SETUP</h1>
+    <p class="screen-sub">Set up the players before starting.</p>
+
+    <div class="segment" id="player-count-segment"></div>
+
+    <div id="player-name-fields"></div>
+
+    <div class="spacer"></div>
+
+    <button
+      class="btn-primary"
+      onclick="cleanPlayerNames(); goTo(2);"
+    >
+      CONTINUE TO RULES
+    </button>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 2: RULES
+       ============================================================ -->
+
+  <div class="screen" id="screen-2">
+    <div class="topbar">
+      <button class="exit-btn" onclick="showExitAlert()">&#10060; EXIT</button>
+      <div class="topbar-title">RULES</div>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div class="rules-scroll">
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">1</div>
+          <div class="rule-title">Generate Number</div>
+        </div>
+        <p class="rule-text">
+A random number from 1&ndash;100 is generated. This is the Swift equivalent of RanInt#(1,100).
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">2</div>
+          <div class="rule-title">Take Turns</div>
+        </div>
+        <p class="rule-text">
+Players take turns entering one number from 1&ndash;100.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">3</div>
+          <div class="rule-title">No Duplicate Guesses</div>
+        </div>
+        <p class="rule-text">
+Players can see previous guesses. A number already guessed during the current round cannot be guessed again.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">4</div>
+          <div class="rule-title">Check Digits</div>
+        </div>
+        <p class="rule-text">
+The guesses are compared with the randomly generated number.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">5</div>
+          <div class="rule-title">Scoring</div>
+        </div>
+        <p class="rule-text">Exact number = +10 points
+One matching digit = +1 point
+Two or more matching digits = +2 points
+No matching digits = closest guess gets +1 point</p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">6</div>
+          <div class="rule-title">Roulette Round</div>
+        </div>
+        <p class="rule-text">
+After the final guess, the roulette wheel spins for 2.5 seconds before revealing the number.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">7</div>
+          <div class="rule-title">Round Results</div>
+        </div>
+        <p class="rule-text">
+The target number, guesses and points are shown after the wheel stops.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">8</div>
+          <div class="rule-title">Winning</div>
+        </div>
+        <p class="rule-text">
+The first active player to reach 100 points wins.
+        </p>
+      </div>
+
+      <div class="rule">
+        <div class="rule-head">
+          <div class="rule-num">9</div>
+          <div class="rule-title">Resigning</div>
+        </div>
+        <p class="rule-text">
+A player may resign during the game. They will no longer participate in future turns.
+        </p>
+      </div>
+
+      <hr class="divider">
+
+      <button class="agree-row" onclick="toggleAgree()">
+        <span class="agree-icon" id="agree-check-icon">&#11036;</span>
+        <span class="agree-text">
+          I agree that by playing this game, I have agreed to play according to these rules.
+        </span>
+      </button>
+
+      <button
+        class="btn-primary"
+        id="agree-continue-btn"
+        onclick="agreeContinue()"
+        disabled
+      >
+        AGREE &amp; CONTINUE
+      </button>
+
+      <div style="height:24px"></div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 3: COIN FLIP
+       ============================================================ -->
+
+  <div class="screen" id="screen-3">
+
+    <div class="topbar">
+      <button class="exit-btn" onclick="showExitAlert()">&#10060; EXIT</button>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="coin-title">WHO GOES FIRST?</div>
+    <div class="coin-subtitle">COIN FLIP</div>
+    <div class="coin-result" id="coin-result-text"></div>
+
+    <div style="height:20px"></div>
+
+    <button
+      class="btn-primary"
+      onclick="generateNumber(); goTo(4);"
+    >
+      START GAME
+    </button>
+
+    <div class="spacer"></div>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 4: GAMEPLAY
+       ============================================================ -->
+
+  <div class="screen" id="screen-4" style="padding:0;">
+
+    <div class="game-topbar">
+
+      <button class="resign-btn" onclick="showResignAlert()">
+        &#128681; RESIGN
+      </button>
+
+      <div class="topbar-title">
+        RNG CALC ROULETTE
+      </div>
+
+      <button class="exit-btn" onclick="showExitAlert()">
+        &#10060; EXIT
+      </button>
+
+    </div>
+
+    <div class="game-content">
+
+      <div class="score-bar" id="score-bar"></div>
+
+      <hr class="divider">
+
+      <div class="section-title">CURRENT ROUND</div>
+
+      <p class="section-note">
+        Target number is hidden
+      </p>
+
+      <div id="current-round-list"></div>
+
+      <div class="already-guessed" id="already-guessed"></div>
+
+      <hr class="divider">
+
+      <div class="turn-title" id="turn-title"></div>
+
+      <div class="guess-row">
+
+        <input
+          type="text"
+          inputmode="numeric"
+          id="guess-input"
+          placeholder="Enter 1&ndash;100"
+          onkeydown="if(event.key==='Enter') submitGuess();"
+        >
+
+        <button onclick="submitGuess()">GUESS</button>
+
+      </div>
+
+      <div class="game-message" id="game-message"></div>
+
+      <hr class="divider">
+
+      <div id="history-section" style="display:none;">
+
+        <div class="section-title">
+          ROUND HISTORY
+        </div>
+
+        <div id="history-list"></div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 5: ROULETTE
+       ============================================================ -->
+
+  <div class="screen" id="screen-5">
+
+    <div class="topbar">
+      <button class="exit-btn" onclick="showExitAlert()">&#10060; EXIT</button>
+      <div class="topbar-title">RNG ROULETTE</div>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="roulette-label">
+      THE NUMBER IS...
+    </div>
+
+    <div class="wheel-wrap">
+
+      <div class="wheel-pointer" aria-hidden="true"></div>
+
+      <svg
+        id="wheel-rotator"
+        viewBox="0 0 320 320"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+
+        <circle
+          cx="160"
+          cy="160"
+          r="155"
+          stroke="#fff"
+          stroke-width="7"
+          fill="none"
+        />
+
+        <g id="wheel-segments"></g>
+
+        <circle
+          cx="160"
+          cy="160"
+          r="125"
+          fill="#000"
+        />
+
+        <circle
+          cx="160"
+          cy="160"
+          r="115"
+          stroke="rgba(255,255,255,0.7)"
+          stroke-width="3"
+          fill="none"
+        />
+
+        <g
+          id="wheel-numbers"
+          font-family="Courier New, monospace"
+          font-weight="700"
+          font-size="8"
+          fill="rgba(255,255,255,0.38)"
+          text-anchor="middle"
+        ></g>
+
+        <circle
+          cx="160"
+          cy="160"
+          r="27.5"
+          fill="#000"
+          stroke="#fff"
+          stroke-width="3"
+        />
+
+        <text
+          x="160"
+          y="164"
+          text-anchor="middle"
+          font-family="Courier New, monospace"
+          font-weight="900"
+          font-size="11"
+          fill="#fff"
+        >
+          RNG
+        </text>
+
+        <polygon
+          points="160,-20 175,-5 145,-5"
+          fill="#fff"
+        />
+
+      </svg>
+    </div>
+
+    <div
+      class="spinning-text"
+      id="spinning-text"
+    >
+      SPINNING...
+    </div>
+
+    <div class="spacer"></div>
+
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 6: ROUND RESULTS
+       ============================================================ -->
+
+  <div class="screen" id="screen-6">
+
+    <div class="topbar">
+      <button class="exit-btn" onclick="showExitAlert()">&#10060; EXIT</button>
+      <div class="topbar-title">ROUND RESULTS</div>
+      <div class="topbar-spacer"></div>
+    </div>
+
+    <div style="overflow-y:auto;flex:1;">
+
+      <div
+        class="section-title"
+        style="text-align:center;"
+      >
+        THE NUMBER WAS
+      </div>
+
+      <div
+        class="result-number"
+        id="result-number"
+      ></div>
+
+      <hr class="divider">
+
+      <div id="result-rows"></div>
+
+      <hr class="divider">
+
+      <div class="section-title">
+        CURRENT SCORES
+      </div>
+
+      <div id="result-scores"></div>
+
+      <button
+        class="btn-primary"
+        style="margin-top:18px;"
+        onclick="nextRound()"
+      >
+        NEXT ROUND
+      </button>
+
+      <div style="height:20px"></div>
+
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SCREEN 7: WINNER
+       ============================================================ -->
+
+  <div class="screen" id="screen-7">
+
+    <div style="overflow-y:auto;flex:1;">
+
+      <div
+        class="topbar"
+        style="justify-content:flex-end;"
+      >
+        <button
+          class="exit-btn"
+          onclick="showExitAlert()"
+        >
+          &#10060; EXIT
+        </button>
+      </div>
+
+      <div class="game-over-title">
+        GAME OVER
+      </div>
+
+      <div
+        class="winner-title"
+        id="winner-name-text"
+      ></div>
+
+      <hr class="divider">
+
+      <div
+        class="section-title"
+        style="text-align:center;font-size:1.2rem;"
+      >
+        FINAL SCORES
+      </div>
+
+      <div
+        id="final-scores"
+        style="margin-top:10px;"
+      ></div>
+
+      <hr class="divider">
+
+      <div
+        class="section-title"
+        style="text-align:center;font-size:1.2rem;"
+      >
+        FULL POINTS TABLE
+      </div>
+
+      <p
+        class="section-note"
+        style="text-align:center;"
+      >
+        Every round, guess, and point earned
+      </p>
+
+      <div
+        class="table-wrap"
+        id="score-table"
+      ></div>
+
+      <hr class="divider">
+
+      <button
+        class="btn-primary"
+        onclick="playAgain()"
+      >
+        PLAY AGAIN
+      </button>
+
+      <button
+        class="btn-danger"
+        onclick="showExitAlert()"
+      >
+        EXIT GAME
+      </button>
+
+      <div style="height:20px"></div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<div
+  class="modal-overlay"
+  id="exit-alert-overlay"
+>
+  <div class="modal-box">
+
+    <div class="modal-title">
+      Exit Game?
+    </div>
+
+    <div class="modal-message">
+      All current game progress will be lost.
+    </div>
+
+    <div class="modal-buttons">
+
+      <button onclick="hideExitAlert()">
+        Cancel
+      </button>
+
+      <button
+        class="destructive"
+        onclick="hideExitAlert(); exitGame();"
+      >
+        Exit
+      </button>
+
+    </div>
+  </div>
+</div>
+
+
+<div
+  class="modal-overlay"
+  id="resign-alert-overlay"
+>
+  <div class="modal-box">
+
+    <div class="modal-title">
+      Resign from the game?
+    </div>
+
+    <div
+      class="modal-message"
+      id="resign-alert-text"
+    ></div>
+
+    <div class="modal-buttons">
+
+      <button onclick="hideResignAlert()">
+        Cancel
+      </button>
+
+      <button
+        class="destructive"
+        onclick="hideResignAlert(); resignCurrentPlayer();"
+      >
+        Resign
+      </button>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+/* =====================================================================
+   FLOATING BUTTON PRESS FEEDBACK
+   ===================================================================== */
+
+document.querySelectorAll('.btn-primary').forEach(btn => {
+  const press = () => btn.classList.add('is-pressed');
+  const release = () => btn.classList.remove('is-pressed');
+
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointercancel', release);
+  btn.addEventListener('pointerleave', release);
+  btn.addEventListener('blur', release);
+});
+
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+
+const state = {
+  screen: 0,
+  playerCount: 2,
+  playerNames: [
+    "Player 1",
+    "Player 2",
+    "Player 3",
+    "Player 4"
+  ],
+  activePlayers: [
+    true,
+    true,
+    true,
+    true
+  ],
+  firstPlayer: 0,
+  currentPlayer: 0,
+  targetNumber: 0,
+  coinResult: "",
+  currentGuesses: [
+    null,
+    null,
+    null,
+    null
+  ],
+  scores: [
+    0,
+    0,
+    0,
+    0
+  ],
+  rounds: [],
+  revealedRound: null,
+  pendingRound: null,
+  message: "",
+  winner: "",
+  agreedToRules: false,
+  wheelRotation: 0,
+  isSpinning: false,
+};
+
+
+/* =====================================================================
+   HTML ESCAPING
+   ===================================================================== */
+
+function escapeHtml(str){
+  return String(str).replace(
+    /[&<>"']/g,
+    c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[c])
+  );
+}
+
+
+/* =====================================================================
+   SCREEN SWITCHING
+   ===================================================================== */
+
+function goTo(n){
+
+  state.screen = n;
+
+  document
+    .querySelectorAll('.screen')
+    .forEach(el => el.style.display = 'none');
+
+  const el = document.getElementById('screen-' + n);
+
+  el.style.display = 'flex';
+
+  renderScreen(n);
+}
+
+
+function renderScreen(n){
+
+  if(n === 1) renderPlayerSetup();
+  else if(n === 2) renderRules();
+  else if(n === 3) renderCoinFlip();
+  else if(n === 4) renderGame();
+  else if(n === 5) renderRoulette();
+  else if(n === 6) renderResults();
+  else if(n === 7) renderWinner();
+
+}
+
+
+/* =====================================================================
+   RESET / SETUP
+   ===================================================================== */
+
+function resetEverything(){
+
+  state.activePlayers = [
+    true,true,true,true
+  ];
+
+  state.scores = [
+    0,0,0,0
+  ];
+
+  state.rounds = [];
+
+  state.currentGuesses = [
+    null,null,null,null
+  ];
+
+  state.message = "";
+  state.winner = "";
+  state.firstPlayer = 0;
+  state.currentPlayer = 0;
+  state.targetNumber = 0;
+  state.agreedToRules = false;
+  state.wheelRotation = 0;
+  state.isSpinning = false;
+  state.pendingRound = null;
+  state.revealedRound = null;
+  state.coinResult = "";
+
+}
+
+
+function cleanPlayerNames(){
+
+  for(let i = 0; i < state.playerCount; i++){
+
+    const n = (
+      state.playerNames[i] || ""
+    ).trim();
+
+    state.playerNames[i] =
+      n ? n : `Player ${i + 1}`;
+
+  }
+
+}
+
+
+/* =====================================================================
+   PLAYER SETUP
+   ===================================================================== */
+
+function renderPlayerSetup(){
+
+  const seg =
+    document.getElementById(
+      'player-count-segment'
+    );
+
+  seg.innerHTML =
+    [2,3,4]
+      .map(n =>
+        `<button
+          type="button"
+          class="seg-btn ${
+            state.playerCount === n
+              ? 'seg-active'
+              : ''
+          }"
+          onclick="setPlayerCount(${n})"
+        >
+          ${n} Players
+        </button>`
+      )
+      .join('');
+
+  const fields =
+    document.getElementById(
+      'player-name-fields'
+    );
+
+  let html = '';
+
+  for(let i = 0; i < state.playerCount; i++){
+
+    html += `
+      <div class="field-group">
+
+        <label>
+          PLAYER ${i + 1}
+        </label>
+
+        <input
+          type="text"
+          value="${escapeHtml(state.playerNames[i])}"
+          oninput="updatePlayerName(${i}, this.value)"
+          placeholder="Enter player name"
+        >
+
+      </div>
+    `;
+
+  }
+
+  fields.innerHTML = html;
+
+}
+
+
+function setPlayerCount(n){
+
+  state.playerCount = n;
+
+  renderPlayerSetup();
+
+}
+
+
+function updatePlayerName(i,val){
+
+  state.playerNames[i] = val;
+
+}
+
+
+/* =====================================================================
+   RULES
+   ===================================================================== */
+
+function toggleAgree(){
+
+  state.agreedToRules =
+    !state.agreedToRules;
+
+  renderRules();
+
+}
+
+
+function renderRules(){
+
+  document.getElementById(
+    'agree-check-icon'
+  ).innerHTML =
+    state.agreedToRules
+      ? '&#9989;'
+      : '&#11036;';
+
+  document.getElementById(
+    'agree-continue-btn'
+  ).disabled =
+    !state.agreedToRules;
+
+}
+
+
+function agreeContinue(){
+
+  if(state.agreedToRules){
+    startCoinFlip();
+  }
+
+}
+
+
+/* =====================================================================
+   COIN FLIP
+   ===================================================================== */
+
+function startCoinFlip(){
+
+  state.firstPlayer =
+    Math.floor(
+      Math.random() * state.playerCount
+    );
+
+  state.currentPlayer =
+    state.firstPlayer;
+
+  state.coinResult =
+    `${state.playerNames[state.firstPlayer]} goes first!`;
+
+  goTo(3);
+
+}
+
+
+function renderCoinFlip(){
+
+  document.getElementById(
+    'coin-result-text'
+  ).textContent =
+    state.coinResult;
+
+}
+
+
+/* =====================================================================
+   NUMBER GENERATION
+   ===================================================================== */
+
+function generateNumber(){
+
+  state.targetNumber =
+    1 + Math.floor(
+      Math.random() * 100
+    );
+
+}
+
+
+/* =====================================================================
+   GAME SCREEN
+   ===================================================================== */
+
+function renderGame(){
+
+  let scoreHtml = '';
+
+  for(let i = 0; i < state.playerCount; i++){
+
+    const isCurrent =
+      state.currentPlayer === i &&
+      state.activePlayers[i];
+
+    scoreHtml += `
+      <div class="score-card ${
+        isCurrent ? 'score-current' : ''
+      }">
+
+        <div class="score-name">
+          ${escapeHtml(state.playerNames[i])}
+
+          ${
+            !state.activePlayers[i]
+              ? '<span class="resigned-tag">RESIGNED</span>'
+              : ''
+          }
+
+        </div>
+
+        <div class="score-value">
+          ${state.scores[i]}
+        </div>
+
+      </div>
+    `;
+
+  }
+
+  document.getElementById(
+    'score-bar'
+  ).innerHTML = scoreHtml;
+
+
+  let curHtml = '';
+
+  for(let i = 0; i < state.playerCount; i++){
+
+    let right;
+
+    if(!state.activePlayers[i]){
+
+      right =
+        `<span
+          class="resigned-tag"
+          style="margin:0;"
+        >
+          RESIGNED
+        </span>`;
+
+    }
+    else if(state.currentGuesses[i] !== null){
+
+      right =
+        `<span class="guess-value">
+          ${state.currentGuesses[i]}
+        </span>`;
+
+    }
+    else{
+
+      right =
+        `<span class="dash">
+          &mdash;
+        </span>`;
+
+    }
+
+    curHtml += `
+      <div class="row-card">
+        <span>
+          ${escapeHtml(state.playerNames[i])}
+        </span>
+        ${right}
+      </div>
+    `;
+
+  }
+
+  document.getElementById(
+    'current-round-list'
+  ).innerHTML = curHtml;
+
+
+  const used =
+    state.currentGuesses.filter(
+      g => g !== null
+    );
+
+  document.getElementById(
+    'already-guessed'
+  ).textContent =
+    used.length
+      ? `Already guessed: ${used.join(', ')}`
+      : '';
+
+
+  document.getElementById(
+    'turn-title'
+  ).textContent =
+    `${state.playerNames[state.currentPlayer]}'s TURN`;
+
+
+  const input =
+    document.getElementById(
+      'guess-input'
+    );
+
+  if(input){
+    input.value = '';
+  }
+
+
+  document.getElementById(
+    'game-message'
+  ).textContent =
+    state.message;
+
+
+  const histSection =
+    document.getElementById(
+      'history-section'
+    );
+
+  if(state.rounds.length === 0){
+
+    histSection.style.display = 'none';
+
+  }
+  else{
+
+    histSection.style.display = 'block';
+
+    let h = '';
+
+    state.rounds.forEach(
+      (round,idx) => {
+
+        h += `
+          <div class="history-card">
+
+            <div class="history-header">
+              <span>ROUND ${idx + 1}</span>
+              <span>Target: ${round.number}</span>
+            </div>
+        `;
+
+        for(
+          let p = 0;
+          p < state.playerCount;
+          p++
+        ){
+
+          const g =
+            round.guesses[p];
+
+          h += `
+            <div class="history-row">
+
+              <span>
+                ${escapeHtml(
+                  state.playerNames[p]
+                )}
+              </span>
+
+              <span>
+                ${
+                  g !== null
+                    ? 'Guess: ' + g
+                    : '&mdash;'
+                }
+              </span>
+
+              <span class="bold">
+                +${round.points[p]}
+              </span>
+
+            </div>
+          `;
+
+        }
+
+        h += '</div>';
+
+      }
+    );
+
+    document.getElementById(
+      'history-list'
+    ).innerHTML = h;
+
+  }
+
+}
+
+
+/* =====================================================================
+   SUBMIT GUESS
+   ===================================================================== */
+
+function submitGuess(){
+
+  if(!state.activePlayers[state.currentPlayer]){
+
+    moveToNextActivePlayer();
+
+    renderGame();
+
+    return;
+  }
+
+
+  const raw =
+    document.getElementById(
+      'guess-input'
+    ).value.trim();
+
+
+  if(
+    raw === '' ||
+    !/^\d+$/.test(raw)
+  ){
+
+    state.message =
+      "Enter a valid number.";
+
+    renderGame();
+
+    return;
+  }
+
+
+  const guess =
+    parseInt(raw,10);
+
+
+  if(
+    guess < 1 ||
+    guess > 100
+  ){
+
+    state.message =
+      "Your guess must be between 1 and 100.";
+
+    renderGame();
+
+    return;
+  }
+
+
+  const used =
+    state.currentGuesses.filter(
+      g => g !== null
+    );
+
+
+  if(used.includes(guess)){
+
+    state.message =
+      `${guess} has already been guessed. Choose another number.`;
+
+    renderGame();
+
+    return;
+  }
+
+
+  state.currentGuesses[
+    state.currentPlayer
+  ] = guess;
+
+  state.message = "";
+
+
+  let allGuessed = true;
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    if(
+      state.activePlayers[p] &&
+      state.currentGuesses[p] === null
+    ){
+
+      allGuessed = false;
+
+      break;
+    }
+
+  }
+
+
+  if(allGuessed){
+
+    prepareRoulette();
+
+    return;
+  }
+
+
+  moveToNextActivePlayer();
+
+  renderGame();
+
+}
+
+
+/* =====================================================================
+   NEXT PLAYER
+   ===================================================================== */
+
+function moveToNextActivePlayer(){
+
+  if(
+    !state.activePlayers.includes(true)
+  ) return;
+
+
+  let next =
+    (state.currentPlayer + 1) %
+    state.playerCount;
+
+
+  while(
+    !state.activePlayers[next] ||
+    state.currentGuesses[next] !== null
+  ){
+
+    next =
+      (next + 1) %
+      state.playerCount;
+
+  }
+
+
+  state.currentPlayer = next;
+
+
+  const already =
+    state.currentGuesses.filter(
+      g => g !== null
+    );
+
+
+  if(already.length > 0){
+
+    state.message =
+      `Already guessed: ${already.join(', ')}`;
+
+  }
+
+}
+
+
+/* =====================================================================
+   RESIGN
+   ===================================================================== */
+
+function showResignAlert(){
+
+  document.getElementById(
+    'resign-alert-text'
+  ).textContent =
+    `${state.playerNames[state.currentPlayer]} will no longer be able to take turns.`;
+
+  document.getElementById(
+    'resign-alert-overlay'
+  ).style.display = 'flex';
+
+}
+
+
+function hideResignAlert(){
+
+  document.getElementById(
+    'resign-alert-overlay'
+  ).style.display = 'none';
+
+}
+
+
+function resignCurrentPlayer(){
+
+  const resigned =
+    state.currentPlayer;
+
+  state.activePlayers[resigned] = false;
+
+  state.currentGuesses[resigned] = null;
+
+  state.message =
+    `${state.playerNames[resigned]} has resigned.`;
+
+
+  const remaining = [];
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    if(state.activePlayers[p]){
+      remaining.push(p);
+    }
+
+  }
+
+
+  if(remaining.length === 1){
+
+    state.winner =
+      state.playerNames[remaining[0]];
+
+    goTo(7);
+
+    return;
+  }
+
+
+  let allRemainingGuessed = true;
+
+  for(const p of remaining){
+
+    if(
+      state.currentGuesses[p] === null
+    ){
+
+      allRemainingGuessed = false;
+
+      break;
+    }
+
+  }
+
+
+  if(allRemainingGuessed){
+
+    prepareRoulette();
+
+    return;
+  }
+
+
+  let next =
+    (resigned + 1) %
+    state.playerCount;
+
+
+  while(
+    !state.activePlayers[next] ||
+    state.currentGuesses[next] !== null
+  ){
+
+    next =
+      (next + 1) %
+      state.playerCount;
+
+  }
+
+
+  state.currentPlayer = next;
+
+  renderGame();
+
+}
+
+
+/* =====================================================================
+   EXIT
+   ===================================================================== */
+
+function showExitAlert(){
+
+  document.getElementById(
+    'exit-alert-overlay'
+  ).style.display = 'flex';
+
+}
+
+
+function hideExitAlert(){
+
+  document.getElementById(
+    'exit-alert-overlay'
+  ).style.display = 'none';
+
+}
+
+
+function exitGame(){
+
+  resetEverything();
+
+  goTo(0);
+
+}
+
+
+/* =====================================================================
+   ROULETTE WHEEL
+   ===================================================================== */
+
+function buildWheel(){
+
+  const NS =
+    "http://www.w3.org/2000/svg";
+
+
+  const segGroup =
+    document.getElementById(
+      'wheel-segments'
+    );
+
+
+  for(
+    let n = 1;
+    n <= 100;
+    n++
+  ){
+
+    const rect =
+      document.createElementNS(
+        NS,
+        'rect'
+      );
+
+    rect.setAttribute(
+      'x',
+      '153.5'
+    );
+
+    rect.setAttribute(
+      'y',
+      '25.6'
+    );
+
+    rect.setAttribute(
+      'width',
+      '13'
+    );
+
+    rect.setAttribute(
+      'height',
+      '134.4'
+    );
+
+    rect.setAttribute(
+      'fill',
+      n % 2 === 0
+        ? 'rgba(255,59,48,0.75)'
+        : '#000'
+    );
+
+    rect.setAttribute(
+      'transform',
+      `rotate(${(n - 1) * 3.6} 160 160)`
+    );
+
+    segGroup.appendChild(rect);
+
+  }
+
+
+  const numGroup =
+    document.getElementById(
+      'wheel-numbers'
+    );
+
+
+  for(
+    let n = 1;
+    n <= 100;
+    n++
+  ){
+
+    // Each number is placed at the centre of its 3.6° segment.
+    const angle =
+      (n - 1) *
+      Math.PI /
+      50;
+
+    const x =
+      160 +
+      Math.sin(angle) *
+      108.8;
+
+    const y =
+      160 -
+      Math.cos(angle) *
+      108.8;
+
+    const text =
+      document.createElementNS(
+        NS,
+        'text'
+      );
+
+    text.setAttribute('x', x.toFixed(2));
+    text.setAttribute('y', (y + 3).toFixed(2));
+    text.setAttribute('font-size', n >= 100 ? '6.5' : n >= 10 ? '7.2' : '8');
+    text.setAttribute('data-number', n);
+    text.textContent = n;
+
+    numGroup.appendChild(text);
+
+  }
+}
+
+
+/* =====================================================================
+   PREPARE ROULETTE
+   ===================================================================== */
+
+function prepareRoulette(){
+
+  const points =
+    calculateRoundPoints();
+
+
+  state.pendingRound = {
+
+    number:
+      state.targetNumber,
+
+    guesses:
+      state.currentGuesses.slice(),
+
+    points:
+      points
+
+  };
+
+
+  state.isSpinning = true;
+
+  goTo(5);
+
+
+  const wheel =
+    document.getElementById(
+      'wheel-rotator'
+    );
+
+
+  wheel.style.transition = 'none';
+
+  wheel.style.transform =
+    `rotate(${state.wheelRotation}deg)`;
+
+
+  void wheel.getBoundingClientRect();
+
+
+  /*
+     Each segment is 3.6°. Segment 1 is already centred directly
+     under the fixed top arrow, so rotate by the exact negative
+     angle of the generated number.
+  */
+  const targetAngle =
+    -(state.targetNumber - 1) *
+    3.6;
+
+  const currentAngle =
+    ((state.wheelRotation % 360) + 360) % 360;
+
+  const desiredAngle =
+    ((targetAngle % 360) + 360) % 360;
+
+  let alignment =
+    desiredAngle - currentAngle;
+
+  if(alignment < 0){
+    alignment += 360;
+  }
+
+  const spins =
+    4 +
+    Math.floor(
+      Math.random() * 4
+    );
+
+  state.wheelRotation +=
+    spins * 360 +
+    alignment;
+
+
+  wheel.style.transition =
+    'transform 2.5s cubic-bezier(0.15,0.8,0.3,1)';
+
+  wheel.style.transform =
+    `rotate(${state.wheelRotation}deg)`;
+
+
+  renderRoulette();
+
+
+  setTimeout(() => {
+
+    state.isSpinning = false;
+
+    document.getElementById(
+      'spinning-text'
+    ).style.display = 'none';
+
+
+    if(state.pendingRound){
+
+      revealRound(
+        state.pendingRound
+      );
+
+    }
+
+  },2500);
+
+}
+
+
+function renderRoulette(){
+
+  document.getElementById(
+    'spinning-text'
+  ).style.display =
+    state.isSpinning
+      ? 'block'
+      : 'none';
+
+  // Light up every number that a player guessed.
+  const guessed = new Set(
+    state.currentGuesses.filter(g => g !== null)
+  );
+
+  document.querySelectorAll('#wheel-numbers text').forEach(label => {
+    const n = Number(label.getAttribute('data-number'));
+    label.classList.toggle('wheel-guess-label', guessed.has(n));
+    label.classList.toggle(
+      'wheel-target-label',
+      !state.isSpinning && n === state.targetNumber
+    );
+  });
+
+}
+
+
+/* =====================================================================
+   SCORING
+   ===================================================================== */
+
+function calculateRoundPoints(){
+
+  const roundPoints =
+    new Array(
+      state.playerCount
+    ).fill(0);
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    if(
+      !state.activePlayers[p] ||
+      state.currentGuesses[p] === null
+    ){
+      continue;
+    }
+
+
+    const guess =
+      state.currentGuesses[p];
+
+
+    if(
+      guess === state.targetNumber
+    ){
+
+      roundPoints[p] = 10;
+
+      continue;
+    }
+
+
+    const guessDigits =
+      new Set(
+        String(guess).split('')
+      );
+
+
+    const targetDigits =
+      new Set(
+        String(state.targetNumber).split('')
+      );
+
+
+    let matching = 0;
+
+
+    guessDigits.forEach(
+      d => {
+
+        if(targetDigits.has(d)){
+          matching++;
+        }
+
+      }
+    );
+
+
+    if(matching === 1){
+
+      roundPoints[p] = 1;
+
+    }
+    else if(matching >= 2){
+
+      roundPoints[p] = 2;
+
+    }
+
+  }
+
+
+  if(
+    roundPoints.every(
+      pt => pt === 0
+    )
+  ){
+
+    let closestDistance =
+      Infinity;
+
+    let closestPlayers = [];
+
+
+    for(
+      let p = 0;
+      p < state.playerCount;
+      p++
+    ){
+
+      if(
+        !state.activePlayers[p] ||
+        state.currentGuesses[p] === null
+      ){
+        continue;
+      }
+
+
+      const distance =
+        Math.abs(
+          state.currentGuesses[p] -
+          state.targetNumber
+        );
+
+
+      if(
+        distance < closestDistance
+      ){
+
+        closestDistance =
+          distance;
+
+        closestPlayers = [p];
+
+      }
+      else if(
+        distance === closestDistance
+      ){
+
+        closestPlayers.push(p);
+
+      }
+
+    }
+
+
+    closestPlayers.forEach(
+      p => {
+        roundPoints[p] = 1;
+      }
+    );
+
+  }
+
+
+  return roundPoints;
+
+}
+
+
+/* =====================================================================
+   REVEAL ROUND
+   ===================================================================== */
+
+function revealRound(round){
+
+  state.rounds.push(round);
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    state.scores[p] +=
+      round.points[p];
+
+  }
+
+
+  state.revealedRound =
+    round;
+
+  state.pendingRound =
+    null;
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    if(
+      state.activePlayers[p] &&
+      state.scores[p] >= 100
+    ){
+
+      state.winner =
+        state.playerNames[p];
+
+      goTo(7);
+
+      return;
+
+    }
+
+  }
+
+
+  goTo(6);
+
+}
+
+
+/* =====================================================================
+   ROUND RESULTS
+   ===================================================================== */
+
+function renderResults(){
+
+  const r =
+    state.revealedRound;
+
+
+  if(!r) return;
+
+
+  document.getElementById(
+    'result-number'
+  ).textContent =
+    r.number;
+
+
+  let rows = '';
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    const g =
+      r.guesses[p];
+
+
+    rows += `
+      <div class="result-row">
+
+        <div>
+
+          <div class="bold">
+            ${escapeHtml(
+              state.playerNames[p]
+            )}
+          </div>
+
+          <div class="caption">
+            ${
+              g !== null
+                ? 'Guess: ' + g
+                : 'No guess'
+            }
+          </div>
+
+        </div>
+
+        <div class="points">
+          +${r.points[p]}
+        </div>
+
+      </div>
+    `;
+
+  }
+
+
+  document.getElementById(
+    'result-rows'
+  ).innerHTML =
+    rows;
+
+
+  let scoresHtml = '';
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    scoresHtml += `
+      <div class="score-row">
+
+        <span>
+          ${escapeHtml(
+            state.playerNames[p]
+          )}
+        </span>
+
+        <span class="bold">
+          ${state.scores[p]}
+        </span>
+
+      </div>
+    `;
+
+  }
+
+
+  document.getElementById(
+    'result-scores'
+  ).innerHTML =
+    scoresHtml;
+
+}
+
+
+/* =====================================================================
+   NEXT ROUND
+   ===================================================================== */
+
+function nextRound(){
+
+  state.targetNumber = 0;
+
+  state.currentGuesses =
+    new Array(
+      state.playerCount
+    ).fill(null);
+
+  state.message = "";
+
+  state.revealedRound = null;
+
+  state.pendingRound = null;
+
+
+  if(
+    state.activePlayers[
+      state.firstPlayer
+    ]
+  ){
+
+    state.currentPlayer =
+      state.firstPlayer;
+
+  }
+  else{
+
+    state.currentPlayer =
+      state.activePlayers.findIndex(
+        a => a === true
+      );
+
+  }
+
+
+  generateNumber();
+
+  goTo(4);
+
+}
+
+
+/* =====================================================================
+   WINNER
+   ===================================================================== */
+
+function renderWinner(){
+
+  document.getElementById(
+    'winner-name-text'
+  ).textContent =
+    `${state.winner} WINS!`;
+
+
+  let finalHtml = '';
+
+
+  for(
+    let i = 0;
+    i < state.playerCount;
+    i++
+  ){
+
+    const isWinner =
+      state.playerNames[i] ===
+      state.winner;
+
+
+    finalHtml += `
+      <div class="final-score-card ${
+        isWinner
+          ? 'winner-highlight'
+          : ''
+      }">
+
+        <span>
+          ${escapeHtml(
+            state.playerNames[i]
+          )}
+        </span>
+
+        ${
+          !state.activePlayers[i]
+            ? '<span class="resigned-tag" style="margin:0;">RESIGNED</span>'
+            : '<span></span>'
+        }
+
+        <span class="bold">
+          ${state.scores[i]}
+        </span>
+
+      </div>
+    `;
+
+  }
+
+
+  document.getElementById(
+    'final-scores'
+  ).innerHTML =
+    finalHtml;
+
+
+  let header =
+    `<tr>
+      <th>ROUND</th>
+      <th>TARGET</th>`;
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    header += `
+      <th>
+        ${escapeHtml(
+          state.playerNames[p]
+        )}
+        <br>
+        <span style="font-weight:400;">
+          Guess / Pts
+        </span>
+      </th>
+    `;
+
+  }
+
+
+  header += '</tr>';
+
+
+  let rows = '';
+
+
+  state.rounds.forEach(
+    (round,idx) => {
+
+      rows += `
+        <tr class="${
+          idx % 2 === 0
+            ? 'row-alt'
+            : ''
+        }">
+
+          <td>${idx + 1}</td>
+
+          <td>${round.number}</td>
+      `;
+
+
+      for(
+        let p = 0;
+        p < state.playerCount;
+        p++
+      ){
+
+        const g =
+          round.guesses[p];
+
+        const pts =
+          round.points[p];
+
+
+        rows += `
+          <td>
+
+            <div class="bold">
+              ${
+                g !== null
+                  ? g
+                  : '&mdash;'
+              }
+            </div>
+
+            <div class="${
+              pts > 0
+                ? 'pts-green'
+                : 'pts-gray'
+            }">
+              +${pts}
+            </div>
+
+          </td>
+        `;
+
+      }
+
+
+      rows += '</tr>';
+
+    }
+  );
+
+
+  let totalRow =
+    '<tr class="total-row"><td colspan="2">TOTAL</td>';
+
+
+  for(
+    let p = 0;
+    p < state.playerCount;
+    p++
+  ){
+
+    totalRow += `
+      <td>
+        ${state.scores[p]}
+      </td>
+    `;
+
+  }
+
+
+  totalRow += '</tr>';
+
+
+  document.getElementById(
+    'score-table'
+  ).innerHTML =
+    `<table>
+      ${header}
+      ${rows}
+      ${totalRow}
+    </table>`;
+
+}
+
+
+/* =====================================================================
+   PLAY AGAIN
+   ===================================================================== */
+
+function playAgain(){
+
+  resetEverything();
+
+  goTo(2);
+
+}
+
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+
+buildWheel();
+
+goTo(0);
+
+</script>
+
+</body>
+</html>
